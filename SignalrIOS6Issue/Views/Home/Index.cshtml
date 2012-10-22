@@ -1,0 +1,74 @@
+﻿@{
+    ViewBag.Title = "Home Page";
+}
+
+@section css{
+    <style>
+        .hide {
+            display:none;
+        }
+    </style>
+}
+
+@*pre-load images*@
+<div class="hide">
+    <img src="../Content/images/BWW_FieldGoal_CirclesGhost.png" />
+    <img src="../Content/images/BWW_FieldGoal_Circles1.png" />
+    <img src="../Content/images/BWW_FieldGoal_Circles2.png" />
+    <img src="../Content/images/BWW_FieldGoal_Circles3.png" />
+    <img src="../Content/images/BWW_FieldGoal_Circles4.png" />
+    <img src="../Content/images/BWW_FieldGoal_Circles5.png" />
+</div>
+
+<div id="loading">
+    <img id="spinnger" src="../Content/images/BWW_FieldGoal_CirclesGhost.png" />
+    <button id="start" class="hide">Start</button>
+</div>
+
+<div id="box" class="hide">
+    <div id="powerMeter" class="hide">
+        <div class="footballCirclesGhost"></div>
+        <div class="footballCircles footballCircles1"></div>
+    </div>
+</div>
+
+@section scripts{
+
+    <script type="text/javascript">
+        $(function () {
+
+            var ui = function () {
+                var self = this;
+                var circleDirection;
+                var circleNum;
+
+                this.$footballCircles = $('.footballCircles');
+
+                this.powerAnimation = function () {
+                    self.$footballCircles.removeClass("footballCircles" + circleNum);
+                    if (circleDirection) {
+                        circleNum++;
+                        if (circleNum == 5)
+                            circleDirection = false;
+                    } else {
+                        circleNum--;
+                        if (circleNum == 0)
+                            circleDirection = true;
+                    }
+                    self.$footballCircles.addClass("footballCircles" + circleNum);
+                };
+
+                var powerAnimationInterval = null;
+
+                this.startPowerAnimation = function () {
+                    powerAnimationInterval = setInterval(function () {
+                        self.powerAnimation();
+                    }, self.options.anglePowerAnimationSpeed);
+                };
+            };
+            
+
+        });
+    </script>
+
+}
