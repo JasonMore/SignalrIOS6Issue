@@ -4,8 +4,72 @@
 
 @section css{
     <style>
-        .hide {
-            display:none;
+        html, body, #body, .bodySection, #game, #loading, #disconnected, #inQueue, #kickSent, #manualLogin
+        {
+		        width:100%;
+                height: 100%;
+		        margin:0;
+		        padding:0;
+        }
+
+        .hide
+        {
+            display: none;
+        }
+
+        .footballCirclesGhost
+        {
+            position: absolute;
+            left: 4.5%;
+            top: 40.8%;
+            width: 55.5%;
+            height: 19%;
+            background: no-repeat url("Content/images/BWW_FieldGoal_CirclesGhost.png") top left;
+            background-size: 100% 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        .footballCircles
+        {
+            position: absolute;
+            left: 4.5%;
+            top: 40.8%;
+            width: 55.5%;
+            height: 19%;
+            z-index: 50;
+            margin: 0;
+            padding: 0;
+        }
+
+        .footballCircles1
+        {
+            background: no-repeat url("Content/images/BWW_FieldGoal_Circles1.png") top left;
+            background-size: 100% 100%;
+        }
+
+        .footballCircles2
+        {
+            background: no-repeat url("Content/images/BWW_FieldGoal_Circles2.png") top left;
+            background-size: 100% 100%;
+        }
+
+        .footballCircles3
+        {
+            background: no-repeat url("Content/images/BWW_FieldGoal_Circles3.png") top left;
+            background-size: 100% 100%;
+        }
+
+        .footballCircles4
+        {
+            background: no-repeat url("Content/images/BWW_FieldGoal_Circles4.png") top left;
+            background-size: 100% 100%;
+        }
+
+        .footballCircles5
+        {
+            background: no-repeat url("Content/images/BWW_FieldGoal_Circles5.png") top left;
+            background-size: 100% 100%;
         }
     </style>
 }
@@ -21,28 +85,72 @@
 </div>
 
 <div id="loading">
-    <img id="spinnger" src="../Content/images/BWW_FieldGoal_CirclesGhost.png" />
-    <button id="start" class="hide">Start</button>
+    <div id="loadingButton">
+        <div id="loadingMessage">
+            <div class="fieldGoalLoadingText">LOADING</div>
+            <div class="loadingSpinner"></div>
+        </div>
+        <div id="readyToPlayMessage">
+            <button id="startButton">READY TO PLAY!</button>
+        </div>
+    </div>
 </div>
 
-<div id="box" class="hide">
-    <div id="powerMeter" class="hide">
+<div id="game" class="hide">
+    <div id="powerMeter">
         <div class="footballCirclesGhost"></div>
         <div class="footballCircles footballCircles1"></div>
     </div>
 </div>
 
 @section scripts{
+    <script src="~/Scripts/jquery.signalR-0.5.3.js" type="text/javascript"></script>
+    <script src="~/signalr/hubs" type="text/javascript"></script>
 
     <script type="text/javascript">
         $(function () {
 
             var ui = function () {
+                // css
+                this.css = {
+                    hide: 'hide'
+                };
+
+                // elements
+                this.$footballCircles = $('.footballCircles');
+                this.$loadingMessage = $('#loadingMessage');
+                this.$readyToPlayMessage = $('#readyToPlayMessage');
+                this.$game = $('#game');
+                this.$loading = $('#loading');
+
+                this.hideLoadingMessage = function () {
+                    self.$loadingMessage.addClass(self.css.hide);
+                };
+
+                this.showReadyToPlayMessage = function () {
+                    self.$readyToPlayMessage.removeClass(self.css.hide);
+                };
+
+                this.showGame = function () {
+                    self.$game.removeClass(self.css.hide);
+                };
+
+                this.hideConnectingScreen = function () {
+                    self.$loading.addClass(self.css.hide);
+                };
+
+                // Animation
                 var self = this;
                 var circleDirection;
                 var circleNum;
 
-                this.$footballCircles = $('.footballCircles');
+                this.resetAnimationDefaults = function () {
+                    // power
+                    self.$footballCircles.removeClass("footballCircles" + circleNum);
+                    circleDirection = true;
+                    circleNum = 1;
+                    self.$footballCircles.addClass("footballCircles" + circleNum);
+                };
 
                 this.powerAnimation = function () {
                     self.$footballCircles.removeClass("footballCircles" + circleNum);
@@ -63,11 +171,41 @@
                 this.startPowerAnimation = function () {
                     powerAnimationInterval = setInterval(function () {
                         self.powerAnimation();
-                    }, self.options.anglePowerAnimationSpeed);
+                    }, 500);
                 };
             };
-            
 
+
+            var controller = function (ui) {
+                var self = this,
+                    hub = $.connection.pageHub
+                ;
+
+                this.init = function () {
+                    $('#startButton').click(self.startButton);
+
+                    $.connection.hub.start(function () {
+                        hub.clientInit();
+                    });
+                };
+
+                hub.gotClientState = function (data) {
+                    ui.hideLoadingMessage();
+                    ui.showReadyToPlayMessage();
+                };
+
+                this.startButton = function () {
+                    ui.resetAnimationDefaults();
+
+                    ui.showGame();
+                    ui.hideConnectingScreen();
+                    ui.startPowerAnimation();
+                };
+            };
+
+
+            var pageController = new controller(new ui());
+            pageController.init();
         });
     </script>
 
